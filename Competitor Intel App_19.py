@@ -100,7 +100,7 @@ st.markdown("""
 <style>
 .logo-container-rpg {
     position: fixed;      /* attach to viewport */
-    top: 10px;            /* visible area */
+    top: 20px;            /* visible area */
     right: 10px;          /* a bit inset from the edge */
     width: 90px;
     height: auto;
@@ -1099,5 +1099,6 @@ if uploaded_file is not None:
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
 
 
