@@ -62,7 +62,7 @@ st.markdown("""
 <style>
 .logo-container {
     position: absolute;
-    top: -80px;
+    top: -75px;
     left: -50px;
     width: 50px;
     height: 30px;
@@ -1099,4 +1099,5 @@ if uploaded_file is not None:
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
 
