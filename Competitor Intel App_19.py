@@ -93,19 +93,18 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-
 # ═════════════════════════════════════════════════════════════════
 # RPG LOGO (Top Right)
 # ═════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
 .logo-container-rpg {
-    position: absolute;
-    top: -115px;
-    right:-40px;
+    position: fixed;      /* attach to viewport */
+    top: 10px;            /* visible area */
+    right: 10px;          /* a bit inset from the edge */
     width: 90px;
-    height: 50px;
-    z-index: 999;
+    height: auto;
+    z-index: 1000;        /* above other elements */
 }
 .logo-container-rpg img {
     width: 100%;
@@ -115,23 +114,22 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-logo_path_rpg = os.path.join(current_folder, "RPG Logo.png")
+# IMPORTANT: match the actual filename exactly (case-sensitive on Streamlit Cloud)
+logo_path_rpg = os.path.join(current_folder, "RPG logo.png")
 
 if os.path.exists(logo_path_rpg):
     with open(logo_path_rpg, 'rb') as img_file:
         logo_b64_rpg = base64.b64encode(img_file.read()).decode()
-        st.markdown(f"""
+    st.markdown(f"""
         <div class="logo-container-rpg">
             <img src="data:image/png;base64,{logo_b64_rpg}" alt="RPG logo">
         </div>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 else:
-    st.markdown("""
-    <div class="logo-container-rpg">
-        <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/RPG%20Logo.png" alt="RPG logo">
-    </div>
-    """, unsafe_allow_html=True)
-
+    # Optional: temporary debug info
+    st.write("RPG logo file not found at:", logo_path_rpg)
 
 # ═════════════════════════════════════════════════════════════════
 # 3. STYLING
@@ -1101,3 +1099,4 @@ if uploaded_file is not None:
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
