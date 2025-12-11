@@ -122,13 +122,13 @@ if os.path.exists(logo_path_rpg):
         logo_b64_rpg = base64.b64encode(img_file.read()).decode()
         st.markdown(f"""
         <div class="logo-container-rpg">
-            <img src="data:image/png;base64,{logo_b64_rpg}" alt="RPG Logo">
+            <img src="data:image/png;base64,{logo_b64_rpg}" alt="RPG logo">
         </div>
         """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <div class="logo-container-rpg">
-        <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/RPG%20Logo.png" alt="RPG Logo">
+        <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/RPG%20Logo.png" alt="RPG logo">
     </div>
     """, unsafe_allow_html=True)
 
@@ -1099,4 +1099,5 @@ if uploaded_file is not None:
         st.error(f"Error loading file: {str(e)}")
 
 if st.session_state.raw_data is not None:
+
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
