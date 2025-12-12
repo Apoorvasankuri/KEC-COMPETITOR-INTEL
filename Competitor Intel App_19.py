@@ -742,7 +742,7 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
         comp_list = str(row.get('Competitor', '')).split(',') if pd.notna(row.get('Competitor')) else []
         comp_list = [c.strip() for c in comp_list if c.strip()]
 
-        # ---- CHANGED: handle "Link" (capital L) column ----
+        # ---- Link column (Link / link) ----
         link_cell = row.get('Link', None)
         if pd.isna(link_cell) or not str(link_cell).strip():
             link_cell = row.get('link', None)  # optional fallback
@@ -750,7 +750,12 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
         link_value = str(link_cell).strip() if link_cell is not None else '#'
         if not link_value:
             link_value = '#'
-        # ---------------------------------------------
+
+        # ---- NEW: Summary column (Summary / summary) ----
+        summary_cell = row.get('Summary', row.get('summary', ''))
+        if pd.isna(summary_cell):
+            summary_cell = ''
+        summary_text = str(summary_cell).strip()
 
         processed_data.append({
             'keyword': str(row.get('keyword', '')).strip(),
@@ -760,11 +765,13 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
             'competitor_list': comp_list,
             'publishedate': pd.to_datetime(row.get('publishedate', datetime.now())),
             'source': str(row.get('source', 'Unknown')).strip(),
-            'link': link_value,   # now populated from "Link"
+            'link': link_value,        # from Link/link
+            'summary': summary_text,   # NEW: from Summary column
         })
 
     return pd.DataFrame(processed_data)
-def load_default_data():
+    
+    def load_default_data():
     """
     Load data from default Excel file stored in project.
     Returns: (all_articles_df, exec_summary_df)
@@ -1099,6 +1106,7 @@ if uploaded_file is not None:
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
 
 
 
