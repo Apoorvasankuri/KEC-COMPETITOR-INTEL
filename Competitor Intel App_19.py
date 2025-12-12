@@ -600,7 +600,9 @@ st.markdown("""
 a.exec-title-link,
 a.exec-title-link:link,
 a.exec-title-link:visited,
-a.exec-title-link:active {
+a.exec-title-link:active,
+a.exec-title-link:hover,
+a.exec-title-link:focus {
     text-decoration: none !important;
     color: inherit;
 }
@@ -1194,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
