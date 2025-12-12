@@ -844,20 +844,26 @@ def render_article_card(article):
         if sbu_q else
         f'<span class="exec-tag exec-tag-sbu">{sbu}</span>'
     )
-# Title link (opens in a new tab if link exists)
+
+    # Title link (opens in a new tab if link exists)
     title_text = str(article.get('newstitle', 'No title'))
     link = str(article.get('link', '') or '').strip()
 
     if link and link != '#':
         title_html = f'<a href="{link}" target="_blank" class="exec-title-link">{title_text}</a>'
     else:
-        # Fallback: no valid link
         title_html = title_text
+
+    # NEW: use Summary column; fall back to old generic text if missing
+    summary = str(article.get('summary', '') or '').strip()
+    if not summary:
+        summary = f"{str(category).title()} - Strategic move in {sbu} business segment showcasing competitive positioning and market dynamics."
+
     st.markdown(f"""
     <div class="exec-summary-card">
         <div class="exec-summary-title">{title_html}</div>
         <div class="exec-summary-text">
-            {str(category).title()} - Strategic move in {sbu} business segment showcasing competitive positioning and market dynamics.
+            {summary}
         </div>
         <div class="exec-tags-container">
             {competitor_tag_html}
@@ -866,7 +872,6 @@ def render_article_card(article):
         </div>
     </div>
     """, unsafe_allow_html=True)
-
 # Main dashboard
 if st.session_state.raw_data is not None:
     # "All" sheet
@@ -899,27 +904,56 @@ if st.session_state.raw_data is not None:
         unsafe_allow_html=True)    
     
     # ==================== EXECUTIVE SUMMARY TAB ====================
-    if current_tab == "Executive Summary":
-        st.markdown("""
-        <div style="margin-top: -60px; margin-bottom: 20px;">
-            <h3 style="margin: 0; padding: 0; font-size: 24px;">Major Moves & Recent Developments</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Get all articles sorted by date and group by category
-        all_articles = df_exec.sort_values('publishedate', ascending=False).copy()
-        
-        # Group articles by category
-        grouped = all_articles.groupby('category')
-        
-        for category, group_df in grouped:
-            # Render category header box
-            st.markdown(f'<div class="category-header-box">{str(category).upper()}</div>', unsafe_allow_html=True)
-            
-            # Render all articles in this category
-            for _, article in group_df.iterrows():
-                render_article_card(article)
+   if current_tab == "Executive Summary":
+    st.markdown("""
+    <div style="margin-top: -60px; margin-bottom: 20px;">
+        <h3 style="margin: 0; padding: 0; font-size: 24px;">Major Moves & Recent Developments</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Get all articles sorted by date
+    all_articles = df_exec.sort_values('publishedate', ascending=False).copy()
+    all_articles['category_normalized'] = (
+        all_articles['category'].astype(str).str.strip().str.lower()
+    )
+
+    # Desired display order (case-insensitive)
+    category_order = [
+        "order wins",
+        "market entry",
+        "mergers and acquisitions",
+        "partnerships and alliances",
+        "financial",
+        "stock market",
+        "leadership/management",
+        "industry",
+    ]
+
+    # Show categories in the specified order
+    for cat in category_order:
+        group_df = all_articles[all_articles['category_normalized'] == cat]
+        if group_df.empty:
+            continue
+
+        display_name = group_df['category'].iloc[0]  # original casing
+        st.markdown(
+            f'<div class="category-header-box">{str(display_name).upper()}</div>',
+            unsafe_allow_html=True,
+        )
+        for _, article in group_df.iterrows():
+            render_article_card(article)
+
+    # (Optional) Any remaining categories not in the list, appended at the end
+    remaining = all_articles[~all_articles['category_normalized'].isin(category_order)]
+    if not remaining.empty:
+        grouped_other = remaining.groupby('category')
+        for category, group_df in grouped_other:
+            st.markdown(
+                f'<div class="category-header-box">{str(category).upper()}</div>',
+                unsafe_allow_html=True,
+            )
+            for _, article in group_df.iterrows():
+                render_article_card(article)    
     # ==================== COMPETITOR & SBU TAB (COMBINED) ====================
     elif current_tab == "Competitor & SBU":
         st.markdown(
@@ -1106,6 +1140,7 @@ if uploaded_file is not None:
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
 
 
 
