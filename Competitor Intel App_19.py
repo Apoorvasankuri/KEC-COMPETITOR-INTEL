@@ -948,7 +948,7 @@ if st.session_state.raw_data is not None:
         ]
 
         # Show categories in the specified order
-        for cat_norm in category_order:
+    for cat_norm in category_order:
             group_df = all_articles[all_articles['category_normalized'] == cat_norm]
             if group_df.empty:
                 continue
@@ -1196,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
