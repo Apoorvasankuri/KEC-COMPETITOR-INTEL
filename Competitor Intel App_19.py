@@ -931,22 +931,25 @@ if st.session_state.raw_data is not None:
         all_articles['category_normalized'] = (
             all_articles['category'].astype(str).str.strip().str.lower()
         )
-
+        # Normalize category to lower case for comparison
+    all_articles['category_normalized'] = (
+        all_articles['category'].astype(str).str.strip().str.lower()
+    )
         # Desired display order (case-insensitive)
         category_order = [
-            "Order Wins",
-            "New Market Entry",
-            "Mergers & Acquisitions",
-            "Partnerships & Alliances",
-            "Financial",
-            "Stock Market",
-            "Leadership/Management",
-            "Industry",
+            "order wins",
+            "new market entry",
+            "mergers & acquisitions",
+            "partnerships & alliances",
+            "financial",
+            "stock market",
+            "leadership/management",
+            "industry",
         ]
 
         # Show categories in the specified order
-        for cat in category_order:
-            group_df = all_articles[all_articles['category_normalized'] == cat]
+        for cat_norm in category_order:
+            group_df = all_articles[all_articles['category_normalized'] == cat_norm]
             if group_df.empty:
                 continue
 
@@ -1193,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
