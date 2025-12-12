@@ -729,6 +729,7 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)# ═════════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════════════════════════
 # LOAD DEFAULT EXCEL FILE
 # ═════════════════════════════════════════════════════════════════
 def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
@@ -750,7 +751,7 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
         if not link_value:
             link_value = '#'
 
-        # ---- NEW: Summary column (Summary / summary) ----
+        # ---- Summary column (Summary / summary) ----
         summary_cell = row.get('Summary', row.get('summary', ''))
         if pd.isna(summary_cell):
             summary_cell = ''
@@ -765,11 +766,12 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
             'publishedate': pd.to_datetime(row.get('publishedate', datetime.now())),
             'source': str(row.get('source', 'Unknown')).strip(),
             'link': link_value,        # from Link/link
-            'summary': summary_text,   # NEW: from Summary column
+            'summary': summary_text,   # from Summary column
         })
 
     return pd.DataFrame(processed_data)
-    
+
+
 def load_default_data():
     """
     Load data from default Excel file stored in project.
@@ -797,6 +799,7 @@ def load_default_data():
 
     return None, None
 
+
 # Load default data on first run
 if st.session_state.raw_data is None:
     default_all, default_exec = load_default_data()
@@ -807,16 +810,17 @@ if st.session_state.raw_data is None:
         # "Executive Summary" sheet → used only in Executive Summary tab
         st.session_state.exec_summary_data = default_exec
 
+
 # Helper function to render article cards (Executive Summary style)
 def render_article_card(article):
     """Render an article in the Executive Summary card format with clickable metadata tags"""
     competitor_list = article.get('competitor_list', []) or []
     sbu_list = article.get('sbu_list', []) or []
-    
+
     competitor = competitor_list[0] if competitor_list else "Unknown"
     category = article.get('category', article.get('keyword', ''))
     sbu = sbu_list[0] if sbu_list else "General"
-    
+
     # URL-encoded values for query params
     comp_q = quote_plus(competitor) if competitor_list else None
     cat_q = quote_plus(str(category)) if category else None
@@ -853,24 +857,32 @@ def render_article_card(article):
     else:
         title_html = title_text
 
-    # NEW: use Summary column; fall back to old generic text if missing
+    # Use Summary column; fall back to generic text if missing
     summary = str(article.get('summary', '') or '').strip()
     if not summary:
-        summary = f"{str(category).title()} - Strategic move in {sbu} business segment showcasing competitive positioning and market dynamics."
+        summary = (
+            f"{str(category).title()} - Strategic move in {sbu} business segment "
+            f"showcasing competitive positioning and market dynamics."
+        )
 
-    st.markdown(f"""
-    <div class="exec-summary-card">
-        <div class="exec-summary-title">{title_html}</div>
-        <div class="exec-summary-text">
-            {summary}
+    st.markdown(
+        f"""
+        <div class="exec-summary-card">
+            <div class="exec-summary-title">{title_html}</div>
+            <div class="exec-summary-text">
+                {summary}
+            </div>
+            <div class="exec-tags-container">
+                {competitor_tag_html}
+                {category_tag_html}
+                {sbu_tag_html}
+            </div>
         </div>
-        <div class="exec-tags-container">
-            {competitor_tag_html}
-            {category_tag_html}
-            {sbu_tag_html}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 # Main dashboard
 if st.session_state.raw_data is not None:
     # "All" sheet
@@ -878,7 +890,7 @@ if st.session_state.raw_data is not None:
     # "Executive Summary" sheet (fallback to All if missing)
     df_exec = (
         st.session_state.exec_summary_data
-    if st.session_state.exec_summary_data is not None
+        if st.session_state.exec_summary_data is not None
         else df_all
     )
 
@@ -900,59 +912,64 @@ if st.session_state.raw_data is not None:
         </div>
         <div class="custom-line"></div>
         """,
-        unsafe_allow_html=True)    
-    
-    # ==================== EXECUTIVE SUMMARY TAB ====================
-   if current_tab == "Executive Summary":
-    st.markdown("""
-    <div style="margin-top: -60px; margin-bottom: 20px;">
-        <h3 style="margin: 0; padding: 0; font-size: 24px;">Major Moves & Recent Developments</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Get all articles sorted by date
-    all_articles = df_exec.sort_values('publishedate', ascending=False).copy()
-    all_articles['category_normalized'] = (
-        all_articles['category'].astype(str).str.strip().str.lower()
+        unsafe_allow_html=True,
     )
 
-    # Desired display order (case-insensitive)
-    category_order = [
-        "order wins",
-        "market entry",
-        "mergers and acquisitions",
-        "partnerships and alliances",
-        "financial",
-        "stock market",
-        "leadership/management",
-        "industry",
-    ]
-
-    # Show categories in the specified order
-    for cat in category_order:
-        group_df = all_articles[all_articles['category_normalized'] == cat]
-        if group_df.empty:
-            continue
-
-        display_name = group_df['category'].iloc[0]  # original casing
+    # ==================== EXECUTIVE SUMMARY TAB ====================
+    if current_tab == "Executive Summary":
         st.markdown(
-            f'<div class="category-header-box">{str(display_name).upper()}</div>',
+            """
+            <div style="margin-top: -60px; margin-bottom: 20px;">
+                <h3 style="margin: 0; padding: 0; font-size: 24px;">Major Moves & Recent Developments</h3>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        for _, article in group_df.iterrows():
-            render_article_card(article)
 
-    # (Optional) Any remaining categories not in the list, appended at the end
-    remaining = all_articles[~all_articles['category_normalized'].isin(category_order)]
-    if not remaining.empty:
-        grouped_other = remaining.groupby('category')
-        for category, group_df in grouped_other:
+        # Get all articles sorted by date
+        all_articles = df_exec.sort_values('publishedate', ascending=False).copy()
+        all_articles['category_normalized'] = (
+            all_articles['category'].astype(str).str.strip().str.lower()
+        )
+
+        # Desired display order (case-insensitive)
+        category_order = [
+            "order wins",
+            "market entry",
+            "mergers and acquisitions",
+            "partnerships and alliances",
+            "financial",
+            "stock market",
+            "leadership/management",
+            "industry",
+        ]
+
+        # Show categories in the specified order
+        for cat in category_order:
+            group_df = all_articles[all_articles['category_normalized'] == cat]
+            if group_df.empty:
+                continue
+
+            display_name = group_df['category'].iloc[0]  # original casing
             st.markdown(
-                f'<div class="category-header-box">{str(category).upper()}</div>',
+                f'<div class="category-header-box">{str(display_name).upper()}</div>',
                 unsafe_allow_html=True,
             )
             for _, article in group_df.iterrows():
-                render_article_card(article)    
+                render_article_card(article)
+
+        # Any remaining categories not in the list, appended at the end
+        remaining = all_articles[~all_articles['category_normalized'].isin(category_order)]
+        if not remaining.empty:
+            grouped_other = remaining.groupby('category')
+            for category, group_df in grouped_other:
+                st.markdown(
+                    f'<div class="category-header-box">{str(category).upper()}</div>',
+                    unsafe_allow_html=True,
+                )
+                for _, article in group_df.iterrows():
+                    render_article_card(article)
+
     # ==================== COMPETITOR & SBU TAB (COMBINED) ====================
     elif current_tab == "Competitor & SBU":
         st.markdown(
@@ -963,27 +980,27 @@ if st.session_state.raw_data is not None:
             """,
             unsafe_allow_html=True,
         )
-        
+
         # Get all unique values for filters (from "All" sheet)
         all_competitors = set()
         for comp_list in df_all['competitor_list']:
             all_competitors.update(comp_list)
-        
+
         all_sbus = set()
         for sbu_list in df_all['sbu_list']:
             all_sbus.update(sbu_list)
-        
+
         # Use 'category' column we created earlier (not 'keyword')
         all_categories = set(df_all['category'].unique())
-        
+
         # Layout: Filter panel on left, articles on right
         col_filter, col_articles = st.columns([1, 3])
-        
+
         # ---------- LEFT: FILTERS ----------
         with col_filter:
             st.markdown('<div class="filter-panel">', unsafe_allow_html=True)
             st.markdown('<p class="filter-title">Filters</p>', unsafe_allow_html=True)
-            
+
             # SBU Filter (UI only)
             st.markdown('<div class="filter-group">', unsafe_allow_html=True)
             st.markdown("**Business Unit**")
@@ -994,7 +1011,7 @@ if st.session_state.raw_data is not None:
                 label_visibility="collapsed",
             )
             st.markdown("</div>", unsafe_allow_html=True)
-            
+
             # Competitor Filter (UI only)
             st.markdown('<div class="filter-group">', unsafe_allow_html=True)
             st.markdown("**Competitor**")
@@ -1005,7 +1022,7 @@ if st.session_state.raw_data is not None:
                 label_visibility="collapsed",
             )
             st.markdown("</div>", unsafe_allow_html=True)
-            
+
             # Category Filter (UI only)
             st.markdown('<div class="filter-group">', unsafe_allow_html=True)
             st.markdown("**Category**")
@@ -1016,7 +1033,7 @@ if st.session_state.raw_data is not None:
                 label_visibility="collapsed",
             )
             st.markdown("</div>", unsafe_allow_html=True)
-            
+
             # Apply / Clear buttons in one row
             st.markdown("<br>", unsafe_allow_html=True)
             btn_col_apply, btn_col_clear = st.columns(2)
@@ -1024,73 +1041,76 @@ if st.session_state.raw_data is not None:
                 apply_clicked = st.button("Apply Filters", key="apply_filters_button")
             with btn_col_clear:
                 clear_clicked = st.button("Clear Filters", key="clear_filters_button")
-            
+
             st.markdown("</div>", unsafe_allow_html=True)
-            
+
             # Handle Apply / Clear actions
             if apply_clicked:
                 # Copy current UI selections into applied filter state
                 st.session_state.selected_sbu_filter = ui_sbu
                 st.session_state.selected_competitor_filter = ui_competitor
                 st.session_state.selected_category_filter = ui_category
-            
+
             if clear_clicked:
                 # Reset applied filters to show all articles
                 st.session_state.selected_sbu_filter = "All"
                 st.session_state.selected_competitor_filter = "All"
                 st.session_state.selected_category_filter = "All"
-        
+
         # ---------- RIGHT: ARTICLES ----------
         with col_articles:
             # Apply filters based on applied filter state (not dropdowns directly)
             filtered_df = df_all.copy()
-            
+
             sbu_filter = st.session_state.selected_sbu_filter
             comp_filter = st.session_state.selected_competitor_filter
             cat_filter = st.session_state.selected_category_filter
-            
+
             if sbu_filter != "All":
                 filtered_df = filtered_df[
                     filtered_df["sbu_list"].apply(lambda x: sbu_filter in x)
                 ]
-            
+
             if comp_filter != "All":
                 filtered_df = filtered_df[
                     filtered_df["competitor_list"].apply(lambda x: comp_filter in x)
                 ]
-            
+
             if cat_filter != "All":
                 filtered_df = filtered_df[filtered_df["category"] == cat_filter]
-            
+
             # Sort by date
             filtered_df = filtered_df.sort_values("publishedate", ascending=False)
-            
-            # st.markdown(f"**Showing {len(filtered_df)} articles**")  # optional
+
             st.markdown("<br>", unsafe_allow_html=True)
-            
+
             # Display articles
             if len(filtered_df) > 0:
                 for _, article in filtered_df.head(50).iterrows():
                     render_article_card(article)
             else:
                 st.info("No articles match the selected filters. Try adjusting your filter criteria.")
-    
+
     # ==================== INDUSTRY TAB (RENAMED) ====================
     elif current_tab == "Industry":
-        st.markdown("""
-        <div style="margin-top: -60px; margin-bottom: 20px;">
-            <h3 style="margin: 0; padding: 0; font-size: 24px;">Industry Updates</h3>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style="margin-top: -60px; margin-bottom: 20px;">
+                <h3 style="margin: 0; padding: 0; font-size: 24px;">Industry Updates</h3>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    # Sort by date descending
+        # Sort by date descending
         all_articles_sorted = df_all.sort_values('publishedate', ascending=False).copy()
 
-    # Define a "primary SBU" per article (first SBU in the list, or "General")
+        # Define a "primary SBU" per article (first SBU in the list, or "General")
         all_articles_sorted['primary_sbu'] = all_articles_sorted['sbu_list'].apply(
-            lambda x: x[0] if isinstance(x, list) and len(x) > 0 else "General" )
+            lambda x: x[0] if isinstance(x, list) and len(x) > 0 else "General"
+        )
 
-    # Group by primary SBU (similar formatting to Executive Summary categories)
+        # Group by primary SBU (similar formatting to Executive Summary categories)
         grouped = all_articles_sorted.groupby('primary_sbu')
 
         for sbu, group_df in grouped:
@@ -1099,25 +1119,28 @@ if st.session_state.raw_data is not None:
 
             st.markdown(
                 f'<div class="category-header-box">{str(sbu).upper()}</div>',
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
-        # Render all articles in this SBU
+            # Render all articles in this SBU
             for _, article in group_df.iterrows():
                 render_article_card(article)
+
 else:
     st.info("📂 Upload an Excel file using the button below to get started")
-    st.markdown("""
-    ### Expected Excel Format:
-    Your Excel file should contain these columns:
-    - **keyword**: The search keyword or topic
-    - **newstitle**: Article title
-    - **SBU**: Strategic Business Unit (comma-separated if multiple)
-    - **Competitor**: Competitor names (comma-separated if multiple)
-    - **publishedate**: Publication date
-    - **source**: News source/publication
-    - **link**: (Optional) Article link
-    """)
+    st.markdown(
+        """
+        ### Expected Excel Format:
+        Your Excel file should contain these columns:
+        - **keyword**: The search keyword or topic
+        - **newstitle**: Article title
+        - **SBU**: Strategic Business Unit (comma-separated if multiple)
+        - **Competitor**: Competitor names (comma-separated if multiple)
+        - **publishedate**: Publication date
+        - **source**: News source/publication
+        - **link**: (Optional) Article link
+        """
+    )
 
 # ═════════════════════════════════════════════════════════════════
 # FILE UPLOADER AT BOTTOM (ALWAYS VISIBLE)
@@ -1148,11 +1171,13 @@ if uploaded_file is not None:
         st.rerun()
 
     except Exception as e:
-        st.error(f"Error loading file: {str(e)}")        
+        st.error(f"Error loading file: {str(e)}")
 
 if st.session_state.raw_data is not None:
-
-    st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
+        unsafe_allow_html=True,
+    )
 
 
 
