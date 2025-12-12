@@ -731,7 +731,6 @@ st.markdown("""
 """, unsafe_allow_html=True)# ═════════════════════════════════════════════════════════════════
 # LOAD DEFAULT EXCEL FILE
 # ═════════════════════════════════════════════════════════════════
-
 def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
     """Convert a raw sheet into the standard columns used by the app."""
     processed_data = []
@@ -771,7 +770,7 @@ def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
 
     return pd.DataFrame(processed_data)
     
-    def load_default_data():
+def load_default_data():
     """
     Load data from default Excel file stored in project.
     Returns: (all_articles_df, exec_summary_df)
@@ -879,7 +878,7 @@ if st.session_state.raw_data is not None:
     # "Executive Summary" sheet (fallback to All if missing)
     df_exec = (
         st.session_state.exec_summary_data
-        if st.session_state.exec_summary_data is not None
+    if st.session_state.exec_summary_data is not None
         else df_all
     )
 
@@ -1078,35 +1077,34 @@ if st.session_state.raw_data is not None:
     
     # ==================== INDUSTRY TAB (RENAMED) ====================
     elif current_tab == "Industry":
-    st.markdown("""
-    <div style="margin-top: -60px; margin-bottom: 20px;">
-        <h3 style="margin: 0; padding: 0; font-size: 24px;">Industry Updates</h3>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="margin-top: -60px; margin-bottom: 20px;">
+            <h3 style="margin: 0; padding: 0; font-size: 24px;">Industry Updates</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Sort by date descending
-    all_articles_sorted = df_all.sort_values('publishedate', ascending=False).copy()
+        all_articles_sorted = df_all.sort_values('publishedate', ascending=False).copy()
 
     # Define a "primary SBU" per article (first SBU in the list, or "General")
-    all_articles_sorted['primary_sbu'] = all_articles_sorted['sbu_list'].apply(
-        lambda x: x[0] if isinstance(x, list) and len(x) > 0 else "General"
-    )
+        all_articles_sorted['primary_sbu'] = all_articles_sorted['sbu_list'].apply(
+            lambda x: x[0] if isinstance(x, list) and len(x) > 0 else "General" )
 
     # Group by primary SBU (similar formatting to Executive Summary categories)
-    grouped = all_articles_sorted.groupby('primary_sbu')
+        grouped = all_articles_sorted.groupby('primary_sbu')
 
-    for sbu, group_df in grouped:
-        if group_df.empty:
-            continue
+        for sbu, group_df in grouped:
+            if group_df.empty:
+                continue
 
-        st.markdown(
-            f'<div class="category-header-box">{str(sbu).upper()}</div>',
+            st.markdown(
+                f'<div class="category-header-box">{str(sbu).upper()}</div>',
             unsafe_allow_html=True,
         )
 
         # Render all articles in this SBU
-        for _, article in group_df.iterrows():
-            render_article_card(article)
+            for _, article in group_df.iterrows():
+                render_article_card(article)
 else:
     st.info("📂 Upload an Excel file using the button below to get started")
     st.markdown("""
@@ -1151,12 +1149,11 @@ if uploaded_file is not None:
 
     except Exception as e:
         st.error(f"Error loading file: {str(e)}")        
-    except Exception as e:
-        st.error(f"Error loading file: {str(e)}")
 
 if st.session_state.raw_data is not None:
 
     st.markdown('<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>', unsafe_allow_html=True)
+
 
 
 
