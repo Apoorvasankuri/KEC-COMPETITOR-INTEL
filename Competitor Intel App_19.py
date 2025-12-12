@@ -858,10 +858,11 @@ def render_article_card(article):
     else:
         title_html = title_text
 
-    # Use Summary column; fall back to generic text if missing
+    # ---- Use Summary column from Excel ----
     summary = str(article.get('summary', '') or '').strip()
-if not summary:
-    summary = "Summary not available."   # or just "" if you prefer blank
+    # Optional: simple fallback if Summary cell is empty
+    if not summary:
+        summary = "Summary not available."
 
     st.markdown(
         f"""
@@ -879,7 +880,6 @@ if not summary:
         """,
         unsafe_allow_html=True,
     )
-
 
 # Main dashboard
 if st.session_state.raw_data is not None:
@@ -1176,6 +1176,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
