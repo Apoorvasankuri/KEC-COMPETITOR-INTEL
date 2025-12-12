@@ -934,14 +934,14 @@ if st.session_state.raw_data is not None:
 
         # Desired display order (case-insensitive)
         category_order = [
-            "order wins",
-            "market entry",
-            "mergers and acquisitions",
-            "partnerships and alliances",
-            "financial",
-            "stock market",
-            "leadership/management",
-            "industry",
+            "Order Wins",
+            "New Market Entry",
+            "Mergers & Acquisitions",
+            "Partnerships & Alliances",
+            "Financial",
+            "Stock Market",
+            "Leadership/Management",
+            "Industry",
         ]
 
         # Show categories in the specified order
@@ -1110,22 +1110,37 @@ if st.session_state.raw_data is not None:
             lambda x: x[0] if isinstance(x, list) and len(x) > 0 else "General"
         )
 
-        # Group by primary SBU (similar formatting to Executive Summary categories)
-        grouped = all_articles_sorted.groupby('primary_sbu')
+        # ===== Custom SBU display order =====
+    # Put your desired SBU order here – these must match values in 'primary_sbu'
+    sbu_order = ["Intl T&D", "India T&D", "Transportation", "Civil", "Renewables", "Oil & Gas", "General"]  # <-- edit this list
 
-        for sbu, group_df in grouped:
-            if group_df.empty:
-                continue
+    # First, render SBUs in the specified order
+    for sbu in sbu_order:
+        group_df = all_articles_sorted[all_articles_sorted['primary_sbu'] == sbu]
+        if group_df.empty:
+            continue
 
+        st.markdown(
+            f'<div class="category-header-box">{str(sbu).upper()}</div>',
+            unsafe_allow_html=True,
+        )
+
+        for _, article in group_df.iterrows():
+            render_article_card(article)
+
+    # Then, render any remaining SBUs that were not in sbu_order
+    remaining = all_articles_sorted[
+        ~all_articles_sorted['primary_sbu'].isin(sbu_order)
+    ]
+    if not remaining.empty:
+        for sbu, group_df in remaining.groupby('primary_sbu'):
             st.markdown(
                 f'<div class="category-header-box">{str(sbu).upper()}</div>',
                 unsafe_allow_html=True,
             )
 
-            # Render all articles in this SBU
             for _, article in group_df.iterrows():
                 render_article_card(article)
-
 else:
     st.info("📂 Upload an Excel file using the button below to get started")
     st.markdown(
@@ -1178,6 +1193,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
