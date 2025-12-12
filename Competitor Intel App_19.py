@@ -734,43 +734,44 @@ st.markdown("""
 # ═════════════════════════════════════════════════════════════════
 def _process_news_dataframe(input_df: pd.DataFrame) -> pd.DataFrame:
     """Convert a raw sheet into the standard columns used by the app."""
+    # Map normalized column names → real names (e.g. "summary " → "Summary")
+    col_map = {str(c).strip().lower(): c for c in input_df.columns}
+
     processed_data = []
     for _, row in input_df.iterrows():
-        sbu_list = str(row.get('SBU', '')).split(',') if pd.notna(row.get('SBU')) else []
+        sbu_list = str(row.get(col_map.get('sbu', 'SBU'), '')).split(',') if pd.notna(row.get(col_map.get('sbu', 'SBU'))) else []
         sbu_list = [s.strip() for s in sbu_list if s.strip()]
 
-        comp_list = str(row.get('Competitor', '')).split(',') if pd.notna(row.get('Competitor')) else []
+        comp_list = str(row.get(col_map.get('competitor', 'Competitor'), '')).split(',') if pd.notna(row.get(col_map.get('competitor', 'Competitor'))) else []
         comp_list = [c.strip() for c in comp_list if c.strip()]
 
-        # ---- Link column (Link / link) ----
-        link_cell = row.get('Link', None)
-        if pd.isna(link_cell) or not str(link_cell).strip():
-            link_cell = row.get('link', None)  # optional fallback
-
+        # ---- Link column (Link / link / LINK / with spaces) ----
+        link_col_name = col_map.get('link')
+        link_cell = row.get(link_col_name, None) if link_col_name else None
         link_value = str(link_cell).strip() if link_cell is not None else '#'
         if not link_value:
             link_value = '#'
 
-        # ---- Summary column (Summary / summary) ----
-        summary_cell = row.get('Summary', row.get('summary', ''))
+        # ---- Summary column (Summary / summary / SUMMARY / with spaces) ----
+        summary_col_name = col_map.get('summary')
+        summary_cell = row.get(summary_col_name, '') if summary_col_name else ''
         if pd.isna(summary_cell):
             summary_cell = ''
         summary_text = str(summary_cell).strip()
 
         processed_data.append({
-            'keyword': str(row.get('keyword', '')).strip(),
-            'category': str(row.get('Category', row.get('keyword', ''))).strip(),
-            'newstitle': str(row.get('newstitle', 'No title')),
+            'keyword': str(row.get(col_map.get('keyword', 'keyword'), '')).strip(),
+            'category': str(row.get(col_map.get('category', 'Category'), row.get(col_map.get('keyword', 'keyword'), ''))).strip(),
+            'newstitle': str(row.get(col_map.get('newstitle', 'newstitle'), 'No title')),
             'sbu_list': sbu_list,
             'competitor_list': comp_list,
-            'publishedate': pd.to_datetime(row.get('publishedate', datetime.now())),
-            'source': str(row.get('source', 'Unknown')).strip(),
-            'link': link_value,        # from Link/link
-            'summary': summary_text,   # from Summary column
+            'publishedate': pd.to_datetime(row.get(col_map.get('publishedate', 'publishedate'), datetime.now())),
+            'source': str(row.get(col_map.get('source', 'source'), 'Unknown')).strip(),
+            'link': link_value,
+            'summary': summary_text,   # <- from the Summary column in Excel
         })
 
     return pd.DataFrame(processed_data)
-
 
 def load_default_data():
     """
@@ -859,11 +860,8 @@ def render_article_card(article):
 
     # Use Summary column; fall back to generic text if missing
     summary = str(article.get('summary', '') or '').strip()
-    if not summary:
-        summary = (
-            f"{str(category).title()} - Strategic move in {sbu} business segment "
-            f"showcasing competitive positioning and market dynamics."
-        )
+if not summary:
+    summary = "Summary not available."   # or just "" if you prefer blank
 
     st.markdown(
         f"""
@@ -1178,6 +1176,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
