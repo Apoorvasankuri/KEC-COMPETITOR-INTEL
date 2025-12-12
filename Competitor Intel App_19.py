@@ -553,7 +553,6 @@ st.markdown("""
         display: flex;
         justify-content: center;
         gap: 12px;
-        text-decoration: none !important;
         width: 110%;          /* wider bar */
         margin-top: -110px;
         margin-left: -75px;
@@ -1197,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
