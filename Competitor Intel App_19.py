@@ -932,7 +932,7 @@ if st.session_state.raw_data is not None:
         all_articles = df_exec.sort_values('publishedate', ascending=False).copy()
 
         # Normalize category to lower case for comparison
-        all_articles['category_normalized'] = (
+            all_articles['category_normalized'] = (
             all_articles['category'].astype(str).str.strip().str.lower()
         )
 
@@ -1196,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
