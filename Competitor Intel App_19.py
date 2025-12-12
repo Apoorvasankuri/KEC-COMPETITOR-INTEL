@@ -573,7 +573,9 @@ st.markdown("""
         text-decoration: none;
         font-size: 16px;
     }
-
+    .custom-tab:hover {
+        text-decoration: none !important;
+}
     .custom-tab.active {
         background-color: #004B9F;  /* active blue */
         color: white;
@@ -1176,6 +1178,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
