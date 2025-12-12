@@ -936,7 +936,7 @@ if st.session_state.raw_data is not None:
         all_articles['category'].astype(str).str.strip().str.lower()
     )
         # Desired display order (case-insensitive)
-        category_order = [
+    category_order = [
             "order wins",
             "new market entry",
             "mergers & acquisitions",
@@ -1196,6 +1196,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
