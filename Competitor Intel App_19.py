@@ -365,7 +365,7 @@ st.markdown("""
         margin-bottom: 2px !important;
         border-left: -40px;
         padding-top: 0 !important;
-        margin-left: -1500px;
+        margin-left: -2500px;
         padding-bottom: 0 !important;
     }
 
@@ -1204,3 +1204,4 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
