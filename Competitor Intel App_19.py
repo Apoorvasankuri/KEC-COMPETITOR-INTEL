@@ -1094,6 +1094,7 @@ if st.session_state.raw_data is not None:
                 st.info("No articles match the selected filters. Try adjusting your filter criteria.")
 
     # ==================== INDUSTRY TAB (RENAMED) ====================
+    # ==================== INDUSTRY TAB (RENAMED) ====================
     elif current_tab == "Industry":
         st.markdown(
             """
@@ -1113,29 +1114,23 @@ if st.session_state.raw_data is not None:
         )
 
         # ===== Custom SBU display order =====
-    # Put your desired SBU order here – these must match values in 'primary_sbu'
-    sbu_order = ["Intl T&D", "India T&D", "Transportation", "Civil", "Renewables", "Oil & Gas", "General"]  # <-- edit this list
+        # Put your desired SBU order here – these must match values in 'primary_sbu'
+        sbu_order = [
+            "Intl T&D",
+            "India T&D",
+            "Transportation",
+            "Civil",
+            "Renewables",
+            "Oil & Gas",
+            "General",
+        ]  # <-- edit this list if needed
 
-    # First, render SBUs in the specified order
-    for sbu in sbu_order:
-        group_df = all_articles_sorted[all_articles_sorted['primary_sbu'] == sbu]
-        if group_df.empty:
-            continue
+        # First, render SBUs in the specified order
+        for sbu in sbu_order:
+            group_df = all_articles_sorted[all_articles_sorted['primary_sbu'] == sbu]
+            if group_df.empty:
+                continue
 
-        st.markdown(
-            f'<div class="category-header-box">{str(sbu).upper()}</div>',
-            unsafe_allow_html=True,
-        )
-
-        for _, article in group_df.iterrows():
-            render_article_card(article)
-
-    # Then, render any remaining SBUs that were not in sbu_order
-    remaining = all_articles_sorted[
-        ~all_articles_sorted['primary_sbu'].isin(sbu_order)
-    ]
-    if not remaining.empty:
-        for sbu, group_df in remaining.groupby('primary_sbu'):
             st.markdown(
                 f'<div class="category-header-box">{str(sbu).upper()}</div>',
                 unsafe_allow_html=True,
@@ -1143,7 +1138,21 @@ if st.session_state.raw_data is not None:
 
             for _, article in group_df.iterrows():
                 render_article_card(article)
-else:
+
+        # Then, render any remaining SBUs that were not in sbu_order
+        remaining = all_articles_sorted[
+            ~all_articles_sorted['primary_sbu'].isin(sbu_order)
+        ]
+        if not remaining.empty:
+            for sbu, group_df in remaining.groupby('primary_sbu'):
+                st.markdown(
+                    f'<div class="category-header-box">{str(sbu).upper()}</div>',
+                    unsafe_allow_html=True,
+                )
+
+                for _, article in group_df.iterrows():
+                    render_article_card(article)
+    else:
     st.info("📂 Upload an Excel file using the button below to get started")
     st.markdown(
         """
@@ -1195,6 +1204,7 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
+
 
 
 
