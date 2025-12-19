@@ -1153,20 +1153,20 @@ if st.session_state.raw_data is not None:
                 for _, article in group_df.iterrows():
                     render_article_card(article)
     else:
-    st.info("📂 Upload an Excel file using the button below to get started")
-    st.markdown(
-        """
-        ### Expected Excel Format:
-        Your Excel file should contain these columns:
-        - **keyword**: The search keyword or topic
-        - **newstitle**: Article title
-        - **SBU**: Strategic Business Unit (comma-separated if multiple)
-        - **Competitor**: Competitor names (comma-separated if multiple)
-        - **publishedate**: Publication date
-        - **source**: News source/publication
-        - **link**: (Optional) Article link
-        """
-    )
+        st.info("📂 Upload an Excel file using the button below to get started")
+        st.markdown(
+            """
+            ### Expected Excel Format:
+            Your Excel file should contain these columns:
+            - **keyword**: The search keyword or topic
+            - **newstitle**: Article title
+            - **SBU**: Strategic Business Unit (comma-separated if multiple)
+            - **Competitor**: Competitor names (comma-separated if multiple)
+            - **publishedate**: Publication date
+            - **source**: News source/publication
+            - **link**: (Optional) Article link
+            """
+        )
 
 # ═════════════════════════════════════════════════════════════════
 # FILE UPLOADER AT BOTTOM (ALWAYS VISIBLE)
@@ -1204,32 +1204,3 @@ if st.session_state.raw_data is not None:
         '<div class="sync-status"><span class="sync-indicator"></span>Data Synced</div>',
         unsafe_allow_html=True,
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
